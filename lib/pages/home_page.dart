@@ -1,10 +1,14 @@
-import 'package:grocery_app/models/products.dart';
+import 'package:get/get.dart';
+import 'package:grocery_app/controller/category_controller.dart';
+import 'package:grocery_app/controller/product_controller.dart';
 import 'package:grocery_app/widget/cart_item_widget.dart';
-import 'package:grocery_app/pages/category_item_page.dart';
-import 'package:grocery_app/models/category_item.dart';
 import 'package:grocery_app/constants/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:grocery_app/widget/category_horizontal_list.dart';
+import 'package:grocery_app/widget/loading-widget/loading_card_widget.dart';
+import 'package:grocery_app/widget/product_section_home.dart';
+import 'package:grocery_app/widget/text_anitmated.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,17 +19,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
-  List gridColor = [
-    const Color(0xff53B175),
-    const Color(0xffF8a44C),
-    const Color(0xffF7A593),
-    const Color(0xffD3B0E0),
-    const Color(0xffFDE598),
-    const Color(0xffB7DFF5),
-    const Color(0xff836AF6),
-    const Color(0xffD73B77),
-  ];
-
+  final ProductController productController = Get.put(ProductController());
+  final CategoryController cateController = Get.put(CategoryController());
 
   static const double maxHeaderHeight = 300;
   static const double minHeaderHeight = 110;
@@ -34,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      setState(() {}); // Rebuild to animate header on scroll
+      setState(() {});
     });
   }
 
@@ -46,20 +41,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final double offset =
-        _scrollController.hasClients ? _scrollController.offset : 0;
-    final double headerHeight =
-        (maxHeaderHeight - offset).clamp(minHeaderHeight, maxHeaderHeight);
+    final double offset = _scrollController.hasClients ? _scrollController.offset : 0;
+    final double headerHeight = (maxHeaderHeight - offset).clamp(minHeaderHeight, maxHeaderHeight);
     final double collapseProgress =
-        ((maxHeaderHeight - headerHeight) / (maxHeaderHeight - minHeaderHeight))
-            .clamp(0.0, 1.0);
+        ((maxHeaderHeight - headerHeight) / (maxHeaderHeight - minHeaderHeight)).clamp(0.0, 1.0);
 
     return Scaffold(
-      backgroundColor: Color.lerp(
-        Constant.lightGreen,
-        Constant.primaryColor,
-        collapseProgress,
-      ),
+      backgroundColor: Color.lerp(Constant.lightGreen, Constant.primaryColor, collapseProgress),
       body: Column(
         children: [
           // 1. Collapsing Header (Manual implementation)
@@ -72,11 +60,7 @@ class _HomePageState extends State<HomePage> {
               right: 16,
             ),
             decoration: BoxDecoration(
-              color: Color.lerp(
-                Constant.lightGreen,
-                Constant.primaryColor,
-                collapseProgress,
-              ),
+              color: Color.lerp(Constant.lightGreen, Constant.primaryColor, collapseProgress),
             ),
             child: Stack(
               clipBehavior: Clip.none,
@@ -113,10 +97,7 @@ class _HomePageState extends State<HomePage> {
 
                 // Search bar
                 Positioned(
-                  top: (headerHeight / 2) -
-                      24 -
-                      30 -
-                      (34 * (1 - collapseProgress)),
+                  top: (headerHeight / 2) - 24 - 30 - (34 * (1 - collapseProgress)),
                   left: 0,
                   right: 0,
                   child: Transform.translate(
@@ -145,14 +126,36 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 16),
                   _bannerCarousel(),
                   const SizedBox(height: 15),
-                  _categories(),
-                  _sectionHeader('Exclusive Offers'),
-                  _horizontalItemList(),
-                  _sectionHeader('Best Selling'),
-                  _horizontalItemList(),
+
+                  _sectionHeader("Categories"),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                    child: CategoryHorizontalList(
+                      gridColor: Constant.boxColor,
+                      items: cateController.category,
+                      products: productController.products,
+                    ),
+                  ),
+                  Obx(() {
+                    if (productController.isProductsLoading.isTrue) {
+                      return const LoadingCardWidget();
+                    }
+                    return ProductSectionHome(title: "New Arrival", sort: 'newest');
+                  }),
+                  Obx(() {
+                    if (productController.isProductsLoading.isTrue) {
+                      return const LoadingCardWidget();
+                    }
+                    return ProductSectionHome(title: 'Best Selling', sort: 'best_selling');
+                  }),
                   const SizedBox(height: 30),
-                  _sectionHeader('More Items'),
-                  _horizontalItemList(),
+                  TextAnimated(cateController.category.map((e) => e.name).toList()),
+                  Obx(() {
+                    if (productController.isProductsLoading.isTrue) {
+                      return const LoadingCardWidget();
+                    }
+                    return _horizontalItemList();
+                  }),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -163,20 +166,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // --- Helper Widgets ---
-
-  final List<String> bannerImages = [
-    "assets/images/banner/banner1.png",
-    "assets/images/banner/banner2.png",
-    "assets/images/banner/banner3.jpeg",
-    "assets/images/banner/banner4.png",
-  ];
-
   Widget _bannerCarousel() {
     return SizedBox(
       height: 190,
       child: CarouselSlider(
-        items: bannerImages.map((imagePath) {
+        items: Constant.bannerImages.map((imagePath) {
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: 5),
             child: ClipRRect(
@@ -200,17 +194,125 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _categories() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  // Widget _categories() {
+  //   final cateItem = cateController.category;
+  //   return Column(
+  //     children: [
+  //       Padding(
+  //         padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+  //         child: Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             const Text('Categories', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+  //             Text(
+  //               "See all",
+  //               style: TextStyle(
+  //                 fontSize: 16,
+  //                 color: Constant.primaryColor,
+  //                 fontWeight: FontWeight.w600,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //       SizedBox(
+  //         height: 130,
+  //         child: ListView.separated(
+  //           scrollDirection: Axis.horizontal,
+  //           itemCount: cateItem.length,
+  //           padding: const EdgeInsets.symmetric(horizontal: 20),
+  //           separatorBuilder: (_, __) => const SizedBox(width: 15),
+  //           itemBuilder: (context, index) {
+  //             return GestureDetector(
+  //               onTap: () {
+  //                 // Navigator.push(
+  //                 //   context,
+  //                 //   MaterialPageRoute(
+  //                 //     builder: (context) => CategoryItemPage(category: cateItem[index]),
+  //                 //   ),
+  //                 // );
+  //                 Get.to(
+  //                   () => CategoryItemPage(category: cateItem[index]),
+  //                   transition: Transition.rightToLeft,
+  //                 );
+  //               },
+  //               child: Column(
+  //                 children: [
+  //                   Container(
+  //                     height: 90,
+  //                     width: 90,
+  //                     padding: const EdgeInsets.all(15),
+  //                     decoration: BoxDecoration(
+  //                       color: Constant.boxColor[index % Constant.boxColor.length].withOpacity(0.2),
+  //                       borderRadius: BorderRadius.circular(12),
+  //                       border: Border.all(
+  //                         color: Constant.boxColor[index % Constant.boxColor.length].withOpacity(
+  //                           0.3,
+  //                         ),
+  //                         width: 1,
+  //                       ),
+  //                     ),
+  //                     child: Image.network(cateItem[index].image),
+  //                   ),
+  //                   const SizedBox(height: 5),
+  //                   Text(
+  //                     cateItem[index].name,
+  //                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+  //                   ),
+  //                 ],
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  // Widget _sectionHeader(String title) {
+  //   return Padding(
+  //     padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: [
+  //         Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+  //         Text(
+  //           "See all",
+  //           style: TextStyle(
+  //             fontSize: 16,
+  //             color: Constant.primaryColor,
+  //             fontWeight: FontWeight.w600,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+  Widget _sectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Categories',
-                  style:
-                  TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Container(
+                height: 3,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: Constant.primaryColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ],
+          ),
+
+          // "See all" with arrow
+          Row(
+            children: [
               Text(
                 "See all",
                 style: TextStyle(
@@ -219,77 +321,9 @@ class _HomePageState extends State<HomePage> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              const SizedBox(width: 4),
+              Icon(Icons.arrow_forward_ios, size: 14, color: Constant.primaryColor),
             ],
-          ),
-        ),
-        SizedBox(
-          height: 130,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: categoryItemDemo.length,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            separatorBuilder: (_, __) => const SizedBox(width: 15),
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CategoryItemPage(
-                          categoryName: categoryItemDemo[index].name),
-                    ),
-                  );
-                },
-                child: Column(
-                  children: [
-                    Container(
-                      height: 90,
-                      width: 90,
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: gridColor[index % gridColor.length]
-                            .withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: gridColor[index % gridColor.length]
-                              .withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Image.asset(categoryItemDemo[index].imgPath),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      categoryItemDemo[index].name,
-                      style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _sectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title,
-              style:
-                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          Text(
-            "See all",
-            style: TextStyle(
-              fontSize: 16,
-              color: Constant.primaryColor,
-              fontWeight: FontWeight.w600,
-            ),
           ),
         ],
       ),
@@ -297,6 +331,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _horizontalItemList() {
+    final items = productController.products;
     return SizedBox(
       height: 260,
       child: ListView.separated(
@@ -305,20 +340,14 @@ class _HomePageState extends State<HomePage> {
         itemCount: items.length,
         separatorBuilder: (context, index) => const SizedBox(width: 15),
         itemBuilder: (context, index) {
-          return SizedBox(
-            width: 170,
-            child: CartItemWidget(item: items[index]),
-          );
+          return SizedBox(width: 170, child: CartItemWidget(product: items[index]));
         },
       ),
     );
   }
 }
 
-// ---------------------------------------------------------
-// 📍 Components
-// ---------------------------------------------------------
-
+/// app bar components
 class _LocationRow extends StatelessWidget {
   const _LocationRow();
 
@@ -332,14 +361,15 @@ class _LocationRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Current Location",
-                  style: TextStyle(fontSize: 13, color: Colors.white)),
-              Text("Phnom Penh, Cambodia",
-                  style: TextStyle(fontSize: 18, color: Colors.white,fontWeight: FontWeight.bold)),
+              Text("Current Location", style: TextStyle(fontSize: 13, color: Colors.white)),
+              Text(
+                "Phnom Penh, Cambodia",
+                style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ],
           ),
         ),
-        Icon(Icons.favorite_border, color: Colors.white,size: 28),
+        Icon(Icons.favorite_border, color: Colors.white, size: 28),
       ],
     );
   }
@@ -369,8 +399,10 @@ class _SearchBar extends StatelessWidget {
           Icon(Icons.search, color: Colors.grey),
           SizedBox(width: 12),
           Expanded(
-            child: Text("Search for restaurants, cuisines or dishes",
-                style: TextStyle(color: Colors.grey)),
+            child: Text(
+              "Search for restaurants, cuisines or dishes",
+              style: TextStyle(color: Colors.grey),
+            ),
           ),
         ],
       ),
@@ -386,15 +418,15 @@ class _Banner extends StatelessWidget {
     return Container(
       // margin: const EdgeInsets.symmetric(horizontal: 20),
       //decoration: BoxDecoration(
-        // color: Constant.primaryColor,
-        // borderRadius: BorderRadius.circular(18),
-        // boxShadow: [
-        //   BoxShadow(
-        //     color: Constant.primaryColor.withOpacity(0.4),
-        //     blurRadius: 10,
-        //     offset: const Offset(0, 5),
-        //   ),
-        // ],
+      // color: Constant.primaryColor,
+      // borderRadius: BorderRadius.circular(18),
+      // boxShadow: [
+      //   BoxShadow(
+      //     color: Constant.primaryColor.withOpacity(0.4),
+      //     blurRadius: 10,
+      //     offset: const Offset(0, 5),
+      //   ),
+      // ],
       //),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -415,7 +447,7 @@ class _Banner extends StatelessWidget {
                       height: 1.1,
                     ),
                   ),
-                  
+
                   // Container(
                   //   padding: const EdgeInsets.symmetric(
                   //     horizontal: 8,
@@ -446,11 +478,7 @@ class _Banner extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 5),
-                      Icon(
-                        Icons.arrow_circle_right_outlined,
-                        color: Colors.white,
-                        size: 18,
-                      ),
+                      Icon(Icons.arrow_circle_right_outlined, color: Colors.white, size: 18),
                     ],
                   ),
                 ],
@@ -467,9 +495,7 @@ class _Banner extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black12, blurRadius: 10),
-                      ],
+                      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
@@ -489,10 +515,7 @@ class _Banner extends StatelessWidget {
                     top: 0,
                     left: 10,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 3,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(4),

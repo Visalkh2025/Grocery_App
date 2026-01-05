@@ -34,9 +34,7 @@ class _SearchSortPageState extends State<SearchSortPage> {
         filteredItems = List.from(allItems);
       } else {
         filteredItems = allItems
-            .where(
-              (item) => item.name.toLowerCase().contains(query.toLowerCase()),
-            )
+            .where((item) => item.name.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
 
@@ -71,10 +69,7 @@ class _SearchSortPageState extends State<SearchSortPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Sort By",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+              const Text("Sort By", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
               _buildSortTile("Name (A-Z)", SortOption.nameAZ),
               _buildSortTile("Price (Low to High)", SortOption.priceLowToHigh),
@@ -96,9 +91,7 @@ class _SearchSortPageState extends State<SearchSortPage> {
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
-      trailing: isSelected
-          ? Icon(Icons.check, color: Constant.primaryColor)
-          : null,
+      trailing: isSelected ? Icon(Icons.check, color: Constant.primaryColor) : null,
       onTap: () {
         setState(() {
           _currentSort = option;
@@ -118,11 +111,7 @@ class _SearchSortPageState extends State<SearchSortPage> {
         elevation: 0,
         toolbarHeight: 80,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
-            size: 20,
-          ),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: Container(
@@ -137,18 +126,10 @@ class _SearchSortPageState extends State<SearchSortPage> {
             autofocus: true,
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
-              prefixIcon: Icon(
-                Icons.search,
-                color: Colors.grey.shade500,
-                size: 22,
-              ),
+              prefixIcon: Icon(Icons.search, color: Colors.grey.shade500, size: 22),
               suffixIcon: searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(
-                        Icons.close,
-                        size: 20,
-                        color: Colors.grey,
-                      ),
+                      icon: const Icon(Icons.close, size: 20, color: Colors.grey),
                       onPressed: () {
                         searchController.clear();
                         onSearch('');
@@ -181,10 +162,7 @@ class _SearchSortPageState extends State<SearchSortPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: Text(
                     "${filteredItems.length} items found",
                     style: TextStyle(
@@ -197,20 +175,16 @@ class _SearchSortPageState extends State<SearchSortPage> {
 
                 Expanded(
                   child: GridView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 0.6,
                     ),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 0.6,
-                        ),
                     itemCount: filteredItems.length,
                     itemBuilder: (context, index) {
-                      return CartItemWidget(item: filteredItems[index]);
+                      // return CartItemWidget(item: filteredItems[index]);
                     },
                   ),
                 ),
@@ -225,11 +199,7 @@ class _SearchSortPageState extends State<SearchSortPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 80,
-              color: Colors.grey.shade300,
-            ),
+            Icon(Icons.search_off_rounded, size: 80, color: Colors.grey.shade300),
             const SizedBox(height: 20),
             Text(
               "No Item Found",

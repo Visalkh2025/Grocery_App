@@ -23,11 +23,9 @@ class _OtpPageState extends State<OtpPage> {
   //   _focusNodes = List.generate(_otpLength, (_) => FocusNode());
   //   _controllers = List.generate(_otpLength, (_) => TextEditingController());
   //   _otpValues = List.filled(_otpLength, '');
-
   //   // Listen for clipboard paste
   //   _checkClipboard();
   // }
-
   // Future<void> _checkClipboard() async {
   //   final data = await Clipboard.getData('text/plain');
   //   final text = data?.text?.trim() ?? '';
@@ -40,7 +38,6 @@ class _OtpPageState extends State<OtpPage> {
   //     _focusNodes.last.requestFocus();
   //   }
   // }
-
   void _onChanged(String value, int index) {
     if (value.length > 1) {
       // Pasted multiple characters

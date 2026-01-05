@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:grocery_app/constants/constant.dart';
+import 'package:grocery_app/controller/cart_controller.dart';
 import 'package:grocery_app/models/grocery_item.dart';
+import 'package:grocery_app/pages/cart_page.dart';
+import 'package:grocery_app/pages/explore_page.dart';
+import 'package:grocery_app/pages/main_page.dart';
 import 'package:grocery_app/pages/order_accepted_page.dart';
+import 'package:grocery_app/pages/payment_page.dart';
 import 'package:grocery_app/widget/primary_button.dart';
+import 'package:icons_plus/icons_plus.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -11,164 +19,220 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  final List<Map<String, dynamic>> summmaryItems = [
-    {"title": "Subtitle", "amount": 430.00},
-    {"title": "Shipping", "amount": 0.0, "editable": true},
-    {"title": "Estimated Taxes", "amount": 12.00},
-    {"title": "Others Fees", "amount": 0.00},
-    {"title": "Total", "amount": 442.50, "bold": true},
-  ];
+  late final CartController cartController = Get.put(CartController());
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new),
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(onPressed: () => Get.back(), icon: Icon(Icons.arrow_back_ios_new)),
+          title: Text("Checkout", style: TextStyle(fontWeight: FontWeight.bold)),
         ),
-        title: Text("Checkout", style: TextStyle(fontWeight: FontWeight.bold)),
-      ),
 
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: [
-            SizedBox(height: 10),
-            ListView.separated(
-              physics: NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: groceries.length,
-              itemBuilder: (context, index) {
-                return Row(
-                  spacing: 10,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(color: Color(0xffF0F1f6)),
-                      child: Stack(
-                        clipBehavior: Clip.none,
+        body: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              SizedBox(height: 10),
 
-                        children: [
-                          Image.asset(
-                            groceries[index].imagePath,
-                            width: 130,
-                            height: 130,
+              Obx(() {
+                final items = cartController.cart.value.items;
+                return ListView.separated(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
                           ),
-                          Positioned(
-                            top: -5,
-                            right: -5,
-                            child: Container(
-                              width: 25,
-                              height: 25,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Color(0xff727272),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                "1",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          // Product image
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Stack(
+                              children: [
+                                Container(
+                                  color: const Color(0xffF4F5F6),
+                                  child: Image.network(
+                                    item.product?.image.first ?? '',
+                                    width: 95,
+                                    height: 95,
+                                    fit: BoxFit.contain,
+                                  ),
                                 ),
-                              ),
+
+                                // Quantity badge
+                                Positioned(
+                                  right: 6,
+                                  top: 6,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black87,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      "x${item.quantity}",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(width: 14),
+
+                          // Product info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.product?.name ?? '',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                ),
+
+                                const SizedBox(height: 6),
+
+                                Text(
+                                  "\$${item.product?.finalPrice.toStringAsFixed(2)}",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Constant.primaryColor,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            groceries[index].name,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(groceries[index].description),
-                          Text(
-                            "\$${groceries[index].price.toStringAsFixed(2)}",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    );
+                  },
+                  separatorBuilder: (context, index) => SizedBox(height: 10),
                 );
-              },
-              separatorBuilder: (context, index) => SizedBox(height: 10),
-            ),
-            SizedBox(height: 15),
-            Row(
-              spacing: 20,
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "Discount code",
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black12),
-                      ),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black12),
+              }),
+
+              SizedBox(height: 15),
+
+              // Promo code section
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: cartController.promoCodeController.value,
+                      decoration: InputDecoration(
+                        hintText: "Discount code",
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.black12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.black12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.black26),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xffF2F4F3),
-                    minimumSize: Size(100, 50),
-                    shape: RoundedRectangleBorder(),
-                  ),
-                  child: Text("Apply"),
-                ),
-              ],
-            ),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: summmaryItems.length,
-              physics: NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(
-                    summmaryItems[index]['title'],
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: summmaryItems[index]["bold"] == true
-                          ? FontWeight.bold
-                          : FontWeight.normal,
+
+                  const SizedBox(width: 10),
+
+                  ElevatedButton(
+                    onPressed: () => cartController.applyPromoCode(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Constant.primaryColor,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(70, 48),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
+                    child: const Text("Apply"),
                   ),
-                  trailing: Text(
-                    summmaryItems[index]["editable"] == true
-                        ? "Enter Shipping address"
-                        : "\$${summmaryItems[index]["amount"]}",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: summmaryItems[index]["bold"] == true
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                    ),
+
+                  const SizedBox(width: 4),
+
+                  IconButton(
+                    onPressed: () => cartController.cancelPromoCode(),
+                    icon: const Icon(Icons.close),
+                    color: Colors.redAccent,
+                    tooltip: "Cancel promo",
                   ),
+                ],
+              ),
+
+              // Summary section - separate Obx
+              Obx(() {
+                final summaryItems = cartController.getSummaryItems();
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: summaryItems.length,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(
+                        summaryItems[index]['title'],
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: summaryItems[index]["bold"] == true
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                      trailing: Text(
+                        summaryItems[index]["editable"] == true
+                            ? "Enter Shipping address"
+                            : "\$${summaryItems[index]["amount"]}",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: summaryItems[index]["bold"] == true
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    );
+                  },
                 );
-              },
-            ),
-          ],
+              }),
+
+              SizedBox(height: 100),
+            ],
+          ),
         ),
-      ),
-      bottomSheet: Container(
-        padding: EdgeInsets.all(20),
-        child: PrimaryButton(text: "Order now", nextPage: OrderAcceptedPage()),
+        bottomSheet: Container(
+          padding: EdgeInsets.all(20),
+          child: PrimaryButton(
+            text: "Order now",
+            onPressed: () {
+              cartController.checkoutCart();
+            },
+          ),
+        ),
       ),
     );
   }

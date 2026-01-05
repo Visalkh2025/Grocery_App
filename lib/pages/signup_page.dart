@@ -49,7 +49,7 @@ class _SignupPageState extends State<SignupPage> {
       log("Signup successful, ${res.token}");
       Get.offAll(() => MainPage());
     } else {
-      Get.snackbar("Error", res.message ?? "Signup failed");
+      Get.snackbar("Error", res.message);
     }
   }
 

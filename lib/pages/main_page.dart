@@ -21,7 +21,7 @@ class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = [
     const HomePage(),
     const ExplorePage(),
-    const CartPage(),
+    CartPage(),
     const FavoritePage(),
     const AccountPage(),
   ];

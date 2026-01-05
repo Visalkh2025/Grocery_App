@@ -1,7 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:grocery_app/config/env_config.dart';
+import 'package:grocery_app/service/storage/token_storage.dart';
 
 class ApiClient {
+  final TokenStorage _tokenStorage = TokenStorage();
+  // Future<String?> get token => _tokenStorage.getToken();
+
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: Envconfig.apiBaseUrl,
@@ -12,7 +16,6 @@ class ApiClient {
       validateStatus: (status) => status! < 500,
     ),
   );
-
   Future<Response> request({
     required String endpoint,
     required String method,
@@ -23,7 +26,12 @@ class ApiClient {
     try {
       Options options = Options(
         method: method,
-        headers: {"Accept": "application/json", if (headers != null) ...headers},
+
+        headers: {
+          "Authorization": "Bearer ${await _tokenStorage.getToken()}",
+          "Accept": "application/json",
+          if (headers != null) ...headers,
+        },
       );
 
       // JSON Request

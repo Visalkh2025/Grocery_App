@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get_instance/get_instance.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/route_manager.dart';
-import 'package:get/utils.dart';
 import 'package:grocery_app/controller/auth_controller.dart';
 import 'package:grocery_app/pages/main_page.dart';
 import 'package:grocery_app/pages/signup_page.dart';
@@ -28,7 +27,6 @@ class _LoginPageState extends State<LoginPage> {
     final res = await authController.login(email.text, password.text);
     if (res.success) {
       SnackbarHelper.showSuccess("Success", res.message ?? "Login successful");
-      // delay to show snackbar
       await Future.delayed(const Duration(milliseconds: 500));
       Get.offAll(() => MainPage());
       log("Login successful");
