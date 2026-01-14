@@ -56,10 +56,11 @@ class _ExplorePageState extends State<ExplorePage> {
                 padding: const EdgeInsets.only(bottom: 20),
                 child: SearchWidget(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SearchSortPage()),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(builder: (context) => SearchSortPage()),
+                    // );
+                    Get.to(() => SearchSortPage());
                   },
                 ),
               ),

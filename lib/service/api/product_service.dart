@@ -66,29 +66,20 @@ class ProductService {
       return Product.empty();
     }
   }
-  // Future<Product> fetchSingleProduct({required String productId}) async {
-  //   try {
-  //     final res = await _api.request(endpoint: "product/$productId", method: "GET");
 
-  //     log("Single product response: ${res.data}");
-
-  //     if (res.statusCode == 200) {
-  //       final data = res.data;
-
-  //       // expect { success, message, product:{...} }
-  //       if (data is Map && data['product'] is Map) {
-  //         return Product.fromJson(data['product']);
-  //       }
-
-  //       log("Unexpected response format: $data");
-  //       return Product.empty();
-  //     }
-
-  //     log("Failed to fetch product: ${res.data}");
-  //     return Product.empty();
-  //   } catch (err) {
-  //     log("Error fetching product: $err");
-  //     return Product.empty();
-  //   }
-  // }
+  Future<List<Product>> searchProduct(String query) async {
+    try {
+      final res = await _api.request(endpoint: "product?search=$query", method: "GET");
+      if (res.statusCode == 200) {
+        List data = res.data['products'];
+        return data.map((item) => Product.fromJson(item)).toList();
+      } else {
+        log("Failed to search product: ${res.data['message']}");
+        return [];
+      }
+    } catch (err) {
+      log("Error Search product: $err");
+      return [];
+    }
+  }
 }

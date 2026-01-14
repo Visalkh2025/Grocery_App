@@ -194,15 +194,15 @@ class _LoginPageState extends State<AuthPage> {
                               final res = await authController.loginGoogle(
                                 auth?.idToken?.toString() ?? "",
                               );
-                              if (res.success) {
-                                SnackbarHelper.showSuccess('Success', res.message);
-                                log("Token saved: ${res.token}");
-                                log("User info: ${res.message}");
-                                Future.delayed(const Duration(milliseconds: 3000), () {
+                              if (res['success'] == true) {
+                                // SnackbarHelper.showSuccess('Success', res.message);
+                                // log("Token saved: ${res.token}");
+                                // log("User info: ${res.message}");
+                                Future.delayed(const Duration(milliseconds: 1000), () {
                                   Get.off(() => MainPage());
                                 });
                               } else {
-                                SnackbarHelper.showError('Error', res.message);
+                                // SnackbarHelper.showError('Error', res.message);
                               }
                             },
                             icon: Image.asset(

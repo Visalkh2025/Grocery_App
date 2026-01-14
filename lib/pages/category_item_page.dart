@@ -29,7 +29,9 @@ class _CategoryItemPageState extends State<CategoryItemPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         centerTitle: true,
         actions: [
           Padding(
@@ -54,7 +56,7 @@ class _CategoryItemPageState extends State<CategoryItemPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
         child: Obx(() {
           if (productController.isProductByCateLoading.value) {
             return const CircularProgressIndicator();

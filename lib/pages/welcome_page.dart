@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grocery_app/constants/constant.dart';
 import 'package:grocery_app/pages/auth_page.dart';
+import 'package:grocery_app/pages/login_page.dart';
 import 'package:grocery_app/widget/primary_button.dart';
 
 class WelcomePage extends StatefulWidget {
@@ -53,7 +54,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 SizedBox(height: 25),
 
                 // SizedBox(
-                PrimaryButton(text: "Get Start", nextPage: AuthPage()),
+                PrimaryButton(text: "Get Start", nextPage: LoginPage()),
                 SizedBox(height: 100),
               ],
             ),

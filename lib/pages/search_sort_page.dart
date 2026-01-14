@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:grocery_app/constants/constant.dart';
+import 'package:grocery_app/controller/product_controller.dart';
 import 'package:grocery_app/models/products.dart';
+import 'package:grocery_app/utils/debouncer.dart';
 import 'package:grocery_app/widget/cart_item_widget.dart';
 
 enum SortOption { nameAZ, priceLowToHigh, priceHighToLow }
@@ -14,31 +17,39 @@ class SearchSortPage extends StatefulWidget {
 
 class _SearchSortPageState extends State<SearchSortPage> {
   final TextEditingController searchController = TextEditingController();
+  final ProductController productController = Get.put(ProductController());
 
-  List<Products> allItems = [];
+  late Debouncer _debouncer;
+  final List<Products> allItems = [];
   List<Products> filteredItems = [];
   SortOption _currentSort = SortOption.nameAZ;
 
   @override
   void initState() {
     super.initState();
+    _debouncer = Debouncer();
 
-    allItems = List.from(items);
+    // allItems = List.from(items);
 
-    filteredItems = List.from(allItems);
+    // filteredItems = List.from(allItems);
   }
 
-  void onSearch(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        filteredItems = List.from(allItems);
-      } else {
-        filteredItems = allItems
-            .where((item) => item.name.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      }
+  void onSearch(String query) async {
+    // setState(() {
+    //   if (query.isEmpty) {
+    //     filteredItems = List.from(allItems);
+    //   } else {
+    //     filteredItems = allItems
+    //         .where((item) => item.name.toLowerCase().contains(query.toLowerCase()))
+    //         .toList();
+    //   }
 
-      _applySort();
+    //   _applySort();
+    // });
+
+    // search from api
+    _debouncer.startSearch(() async {
+      await productController.searchProduct(query: query);
     });
   }
 
@@ -64,7 +75,8 @@ class _SearchSortPageState extends State<SearchSortPage> {
       ),
       builder: (context) {
         return Container(
-          padding: const EdgeInsets.all(20),
+          // padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,6 +116,8 @@ class _SearchSortPageState extends State<SearchSortPage> {
 
   @override
   Widget build(BuildContext context) {
+    final searchPro = productController.searchProducts.value;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -112,7 +126,7 @@ class _SearchSortPageState extends State<SearchSortPage> {
         toolbarHeight: 80,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Get.back(),
         ),
         title: Container(
           height: 45,
@@ -156,40 +170,62 @@ class _SearchSortPageState extends State<SearchSortPage> {
           ),
         ],
       ),
-      body: filteredItems.isEmpty
-          ? _buildEmptyState()
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Text(
-                    "${filteredItems.length} items found",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-                ),
 
-                Expanded(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 0.6,
-                    ),
-                    itemCount: filteredItems.length,
-                    itemBuilder: (context, index) {
-                      // return CartItemWidget(item: filteredItems[index]);
-                    },
+      // body: searchPro.isEmpty
+      //     ? _buildEmptyState()
+      //     : Column(
+      //         crossAxisAlignment: CrossAxisAlignment.start,
+      //         children: [
+      //           Expanded(
+      //             child: Obx(() {
+      //               final searchPro = productController.searchProducts.value;
+      //               return productController.isSearchLoading.isTrue
+      //                   ? Center(child: CircularProgressIndicator())
+      //                   : GridView.builder(
+      //                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      //                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      //                         crossAxisCount: 2,
+      //                         mainAxisSpacing: 10,
+      //                         crossAxisSpacing: 10,
+      //                         childAspectRatio: 0.6,
+      //                       ),
+      //                       itemCount: searchPro.length,
+      //                       itemBuilder: (context, index) {
+      //                         return CartItemWidget(product: searchPro[index]);
+      //                       },
+      //                     );
+      //             }),
+      //           ),
+      //         ],
+      //       ),
+      body: Obx(() {
+        final searchPro = productController.searchProducts.value;
+
+        return searchPro.isEmpty
+            ? _buildEmptyState()
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: productController.isSearchLoading.isTrue
+                        ? const Center(child: CircularProgressIndicator())
+                        : GridView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 10,
+                              crossAxisSpacing: 10,
+                              childAspectRatio: 0.6,
+                            ),
+                            itemCount: searchPro.length,
+                            itemBuilder: (context, index) {
+                              return CartItemWidget(product: searchPro[index]);
+                            },
+                          ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+      }),
     );
   }
 

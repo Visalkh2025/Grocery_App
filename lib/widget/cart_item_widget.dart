@@ -1,12 +1,15 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:grocery_app/constants/constant.dart';
 import 'package:grocery_app/controller/cart_controller.dart';
+import 'package:grocery_app/controller/wishlist_controller.dart';
 import 'package:grocery_app/models/product.dart';
 import 'package:grocery_app/pages/detail_product_page.dart';
+import 'package:grocery_app/utils/currency_format.dart';
 
 class CartItemWidget extends StatelessWidget {
   final Product product;
@@ -15,6 +18,7 @@ class CartItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CartController cartController = Get.put(CartController());
+
     return GestureDetector(
       onTap: () {
         log("Tapped on product: ${product.id}");
@@ -44,7 +48,27 @@ class CartItemWidget extends StatelessWidget {
                       aspectRatio: 1,
                       child: ClipRRect(
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-                        child: Image.network(product.image[0], fit: BoxFit.contain),
+                        // child: product.image.isNotEmpty
+                        //     ? Image.network(product.image[0], fit: BoxFit.contain)
+                        //     : Icon(Icons.image_not_supported, color: Colors.grey),
+                        // child: Image.network(
+                        //   product.image.first,
+                        //   fit: BoxFit.contain,
+                        //   // loadingBuilder: (context, child, loadingProgress) {
+                        //   //   if (loadingProgress == null) return child;
+                        //   //   return const Center(child: CircularProgressIndicator());
+                        //   // },
+                        //   errorBuilder: (context, error, stackTrace) {
+                        //     return const Icon(Icons.image_not_supported, color: Colors.grey);
+                        //   },
+                        // ),
+                        child: CachedNetworkImage(
+                          imageUrl: product.image.first,
+                          fit: BoxFit.contain,
+                          errorWidget: (context, error, stackTrace) {
+                            return const Icon(Icons.image_not_supported, color: Colors.grey);
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -68,15 +92,6 @@ class CartItemWidget extends StatelessWidget {
                         ),
                       ),
                     ),
-                  const Positioned(
-                    top: 8,
-                    right: 8,
-                    child: CircleAvatar(
-                      radius: 14,
-                      backgroundColor: Colors.white,
-                      child: Icon(Icons.favorite_border, size: 18, color: Colors.grey),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -106,16 +121,18 @@ class CartItemWidget extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              "\$${product.finalPrice.toStringAsFixed(2)}",
+                              // "\$${product.finalPrice.toStringAsFixed(2)}",
+                              rielFormat.format(product.finalPrice),
                               style: TextStyle(
                                 color: Constant.primaryColor,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                                fontSize: 16,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 5),
                             Text(
-                              "\$${product.price.toStringAsFixed(2)}",
+                              // "\$${product.price.toStringAsFixed(2)}",
+                              rielFormat.format(product.price),
                               style: const TextStyle(
                                 color: Colors.grey,
                                 decoration: TextDecoration.lineThrough,
@@ -126,11 +143,12 @@ class CartItemWidget extends StatelessWidget {
                         )
                       else
                         Text(
-                          "\$${product.price.toStringAsFixed(2)}",
+                          // "\$${product.price.toStringAsFixed(2)}",
+                          rielFormat.format(product.price),
                           style: TextStyle(
                             color: Constant.primaryColor,
                             fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                            fontSize: 16,
                           ),
                         ),
                       Container(

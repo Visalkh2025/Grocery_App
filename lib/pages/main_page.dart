@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/pages/cart_page.dart';
+import 'package:grocery_app/widget/promotion_dialog.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:grocery_app/constants/constant.dart';
 
@@ -39,6 +40,22 @@ class _MainPageState extends State<MainPage> {
   void _onItemTapped(int index) {
     setState(() {
       currentIndex = index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showAwesomePromoDialog(context, "KHMER");
+
+      Future.delayed(const Duration(seconds: 3), () {
+        if (!mounted) return;
+
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+      });
     });
   }
 

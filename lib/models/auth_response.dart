@@ -1,8 +1,10 @@
+import 'package:grocery_app/models/user.dart';
+
 class AuthResponse {
   final bool success;
   final String message;
   final String? token;
-  final Map<String, dynamic>? user;
+  final User? user;
 
   AuthResponse({required this.success, required this.message, this.token, this.user});
 
@@ -11,7 +13,7 @@ class AuthResponse {
       success: json['success'] ?? false,
       message: json['message'] ?? '',
       token: json['token'],
-      user: json['user'] != null ? Map<String, dynamic>.from(json['user']) : null,
+      user: json['user'],
     );
   }
 }

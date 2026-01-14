@@ -49,7 +49,7 @@ class PaymentController extends GetxController {
         () => KHQRPaymentPage(
           qr: paymentData.value!['payment']['qr'],
           expiration: paymentData.value!['payment']['expiration'],
-          amountUsd: paymentData.value!['amountPaid'],
+          // amountUsd: paymentData.value!['amountPaid'],
           amountKhr: paymentData.value!['payment']['amount'],
           deepLink: paymentData.value!['payment']['deepLink'],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:grocery_app/controller/auth_controller.dart';
 import 'package:grocery_app/controller/cart_controller.dart';
 import 'package:grocery_app/controller/product_controller.dart';
@@ -21,6 +22,8 @@ import 'package:grocery_app/service/storage/token_storage.dart';
 // }
 Future main() async {
   await dotenv.load(fileName: ".env");
+  await GetStorage.init();
+
   Get.put(AuthController());
   Get.put(ProductController());
   Get.put(CartController());
@@ -60,11 +63,12 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         fontFamily: 'Gilroy',
         appBarTheme: AppBarTheme(scrolledUnderElevation: 0.0, elevation: 0),
-        inputDecorationTheme: InputDecorationTheme(
-          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xffE2E2E2))),
-          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xffE2E2E2))),
-          border: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xffE2E2E2))),
-        ),
+
+        // inputDecorationTheme: InputDecorationTheme(
+        //   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xffE2E2E2))),
+        //   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xffE2E2E2))),
+        //   border: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xffE2E2E2))),
+        // ),
         // bottomSheetTheme: BottomSheetThemeData(
         //   backgroundColor: Colors.transparent,
         // ),

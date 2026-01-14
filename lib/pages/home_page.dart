@@ -1,6 +1,9 @@
 import 'package:get/get.dart';
 import 'package:grocery_app/controller/category_controller.dart';
 import 'package:grocery_app/controller/product_controller.dart';
+import 'package:grocery_app/controller/wishlist_controller.dart';
+import 'package:grocery_app/pages/favorite_page.dart';
+import 'package:grocery_app/pages/search_sort_page.dart';
 import 'package:grocery_app/widget/cart_item_widget.dart';
 import 'package:grocery_app/constants/constant.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +11,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:grocery_app/widget/category_horizontal_list.dart';
 import 'package:grocery_app/widget/loading-widget/loading_card_widget.dart';
 import 'package:grocery_app/widget/product_section_home.dart';
+import 'package:grocery_app/widget/promotion_dialog.dart';
 import 'package:grocery_app/widget/text_anitmated.dart';
 
 class HomePage extends StatefulWidget {
@@ -168,7 +172,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _bannerCarousel() {
     return SizedBox(
-      height: 190,
+      height: 210,
       child: CarouselSlider(
         items: Constant.bannerImages.map((imagePath) {
           return Container(
@@ -185,7 +189,7 @@ class _HomePageState extends State<HomePage> {
           );
         }).toList(),
         options: CarouselOptions(
-          height: 200,
+          height: 210,
           autoPlay: true,
           enlargeCenterPage: true,
           viewportFraction: 0.9,
@@ -369,7 +373,13 @@ class _LocationRow extends StatelessWidget {
             ],
           ),
         ),
-        Icon(Icons.favorite_border, color: Colors.white, size: 28),
+        // IconButton(
+        //   icon: Icon(Icons.favorite_border),
+        //   color: Colors.white,
+        //   onPressed: () {
+        //     Get.to(() => FavoritePage());
+        //   },
+        // ),
       ],
     );
   }
@@ -380,31 +390,36 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 45,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: const [
-          Icon(Icons.search, color: Colors.grey),
-          SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              "Search for restaurants, cuisines or dishes",
-              style: TextStyle(color: Colors.grey),
+    return GestureDetector(
+      onTap: () {
+        Get.to(() => SearchSortPage());
+      },
+      child: Container(
+        height: 45,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.white.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Row(
+          children: const [
+            Icon(Icons.search, color: Colors.grey),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "Search for restaurants, cuisines or dishes",
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

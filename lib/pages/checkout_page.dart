@@ -8,6 +8,7 @@ import 'package:grocery_app/pages/explore_page.dart';
 import 'package:grocery_app/pages/main_page.dart';
 import 'package:grocery_app/pages/order_accepted_page.dart';
 import 'package:grocery_app/pages/payment_page.dart';
+import 'package:grocery_app/utils/currency_format.dart';
 import 'package:grocery_app/widget/primary_button.dart';
 import 'package:icons_plus/icons_plus.dart';
 
@@ -28,9 +29,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           leading: IconButton(onPressed: () => Get.back(), icon: Icon(Icons.arrow_back_ios_new)),
           title: Text("Checkout", style: TextStyle(fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.white,
         ),
 
         body: SingleChildScrollView(
@@ -74,6 +77,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                     width: 95,
                                     height: 95,
                                     fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Center(
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                          size: 100,
+                                          color: Colors.grey,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
 
@@ -117,7 +129,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 const SizedBox(height: 6),
 
                                 Text(
-                                  "\$${item.product?.finalPrice.toStringAsFixed(2)}",
+                                  // "\$${item.product?.finalPrice.toStringAsFixed(2)}",
+                                  rielFormat.format(item.product?.finalPrice),
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -207,7 +220,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       trailing: Text(
                         summaryItems[index]["editable"] == true
                             ? "Enter Shipping address"
-                            : "\$${summaryItems[index]["amount"]}",
+                            // : "\$${summaryItems[index]["amount"]}",
+                            : rielFormat.format(summaryItems[index]["amount"]),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: summaryItems[index]["bold"] == true

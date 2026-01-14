@@ -54,71 +54,7 @@ class _FilterPageState extends State<FilterPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("Categories", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-            // Row(
-            //   children: [
-            //     GestureDetector(
-            //       onTap: () {
-            //         setState(
-            //           () {
-            //             isChecked = !isChecked;
-            //           },
-            //         );
-            //       },
-            //       child: AnimatedContainer(
-            //         duration: const Duration(
-            //           milliseconds: 200,
-            //         ),
-            //         width: 25,
-            //         height: 25,
-            //         decoration: BoxDecoration(
-            //           color: isChecked
-            //               ? Colors.green
-            //               : Colors.transparent,
-            //           borderRadius: BorderRadius.circular(
-            //             5,
-            //           ),
-            //           border: Border.all(
-            //             color: isChecked
-            //                 ? Colors.green
-            //                 : Colors.grey.shade400,
-            //             width: 2,
-            //           ),
-            //           boxShadow: [
-            //             if (isChecked)
-            //               BoxShadow(
-            //                 color: Colors.green.withValues(
-            //                   alpha: .3,
-            //                 ),
-            //                 blurRadius: 6,
-            //                 offset: const Offset(
-            //                   0,
-            //                   2,
-            //                 ),
-            //               ),
-            //           ],
-            //         ),
-            //         child: isChecked
-            //             ? const Icon(
-            //                 Icons.check,
-            //                 color: Colors.white,
-            //                 size: 18,
-            //               )
-            //             : null,
-            //       ),
-            //     ),
-            //     const SizedBox(
-            //       width: 10,
-            //     ),
-            //     const Text(
-            //       "Eggs",
-            //       style: TextStyle(
-            //         color: Colors.black87,
-            //         fontSize: 16,
-            //         fontWeight: FontWeight.w500,
-            //       ),
-            //     ),
-            //   ],
-            // ),
+
             ListView.builder(
               itemCount: categoriesName.length,
               itemBuilder: (context, index) {

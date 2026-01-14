@@ -97,27 +97,26 @@ class CartService {
     }
     return null;
   }
+
   // handlecancle promocode
-Future<void> handlecanclePromocode() async {
-  try {
-    final res = await _api.request(
-      endpoint: "cancel_promocode",
-      method: "DELETE",
-    );
-    if (res.statusCode == 200) {
-      Get.snackbar("Success", res.data['message']);
-      log("Promo code cancelled successfully");
-    } else {
-      Get.snackbar("Error", res.data['message']);
-      log("Error cancelling promo code: ${res.data['message']}");
+  Future<void> handlecanclePromocode() async {
+    try {
+      final res = await _api.request(endpoint: "cancel_promocode", method: "DELETE");
+      if (res.statusCode == 200) {
+        Get.snackbar("Success", res.data['message']);
+        log("Promo code cancelled successfully");
+      } else {
+        Get.snackbar("Error", res.data['message']);
+        log("Error cancelling promo code: ${res.data['message']}");
+      }
+    } catch (err) {
+      log("Error cancelling promocode: $err");
     }
-  } catch (err) {
-    log("Error cancelling promocode: $err");
   }
-}
 
   Future<Map<String, dynamic>?> checkout({
-    required double totalAmount,
+    // required double totalAmount,
+    required int totalAmount,
     String? promoCode,
     // String? addressId,
     required List<Map<String, dynamic>> items,

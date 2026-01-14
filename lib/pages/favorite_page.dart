@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:grocery_app/constants/constant.dart';
-import 'package:grocery_app/models/grocery_item.dart';
+import 'package:grocery_app/controller/cart_controller.dart';
+import 'package:grocery_app/controller/product_controller.dart';
+import 'package:grocery_app/controller/wishlist_controller.dart';
+import 'package:grocery_app/models/wishlist.dart';
+import 'package:grocery_app/utils/currency_format.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -10,37 +15,35 @@ class FavoritePage extends StatefulWidget {
 }
 
 class _FavoritePageState extends State<FavoritePage> {
-  late List<GroceryItem> _favoriteItems;
+  // late List<GroceryItem> _favoriteItems;
+  final WishlistController wishlistController = Get.put(WishlistController());
+  final ProductController productController = Get.put(ProductController());
+  final CartController cartController = Get.put(CartController());
 
   @override
   void initState() {
     super.initState();
+    wishlistController.fetchWishlist();
 
-    _favoriteItems = List.from(beverages);
+    // _favoriteItems = List.from(beverages);
   }
 
-  void _removeItem(int index) {
-    setState(() {
-      _favoriteItems.removeAt(index);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Removed from wishlist"),
-        duration: Duration(seconds: 1),
-      ),
-    );
+  void _removeItem(String? productId) async {
+    if (productId == null) return;
+    await wishlistController.removeWishlist(productId: productId);
   }
 
-  void _clearAll() {
-    setState(() {
-      _favoriteItems.clear();
-    });
+  void _clearAll() {}
+
+  void _addToCart(String? productId) async {
+    if (productId == null) return;
+    await cartController.createCart(productId: productId);
+    await wishlistController.removeWishlist(productId: productId);
+    await wishlistController.fetchWishlist();
   }
 
-  void _addAllToCart() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("${_favoriteItems.length} items added to cart!")),
-    );
+  void _addAllToCart() async {
+    // not do
   }
 
   @override
@@ -56,20 +59,29 @@ class _FavoritePageState extends State<FavoritePage> {
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         actions: [
-          if (_favoriteItems.isNotEmpty)
-            TextButton(
-              onPressed: _clearAll,
-              child: const Text(
-                "Clear",
-                style: TextStyle(
-                  color: Colors.redAccent,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+          Obx(() {
+            return wishlistController.wishlist.value.items.isNotEmpty
+                ? TextButton(
+                    onPressed: _clearAll,
+                    child: const Text(
+                      "Clear",
+                      style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600),
+                    ),
+                  )
+                : SizedBox();
+          }),
         ],
       ),
-      body: _favoriteItems.isEmpty ? _buildEmptyState() : _buildContent(),
+      // body: _favoriteItems.isEmpty ? _buildEmptyState() : _buildContent(),
+      body: Obx(() {
+        if (wishlistController.isLoading.isTrue) {
+          return Center(child: CircularProgressIndicator());
+        } else if (wishlistController.wishlist.value.items.isEmpty) {
+          return _buildEmptyState();
+        } else {
+          return _buildContent();
+        }
+      }),
     );
   }
 
@@ -101,23 +113,25 @@ class _FavoritePageState extends State<FavoritePage> {
         const SizedBox(height: 10),
         Expanded(
           child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            itemCount: _favoriteItems.length,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            itemCount: wishlistController.wishlist.value.items.length,
             separatorBuilder: (_, __) => const SizedBox(height: 15),
             itemBuilder: (context, index) {
-              final item = _favoriteItems[index];
-              return _buildFavoriteItem(item, index);
+              // final item = _favoriteItems[index];
+              final Item items = wishlistController.wishlist.value.items[index];
+
+              return _buildFavoriteItem(items, index);
             },
           ),
         ),
-        _buildBottomButton(),
+        // _buildBottomButton(),
       ],
     );
   }
 
-  Widget _buildFavoriteItem(GroceryItem item, int index) {
+  Widget _buildFavoriteItem(Item item, int index) {
     return Dismissible(
-      key: Key(item.name),
+      key: Key(item.product!.name),
       direction: DismissDirection.endToStart,
       background: Container(
         padding: const EdgeInsets.only(right: 20),
@@ -128,7 +142,7 @@ class _FavoritePageState extends State<FavoritePage> {
         alignment: Alignment.centerRight,
         child: const Icon(Icons.delete_outline, color: Colors.red, size: 30),
       ),
-      onDismissed: (direction) => _removeItem(index),
+      onDismissed: (direction) => _removeItem(item.product!.id),
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -152,7 +166,16 @@ class _FavoritePageState extends State<FavoritePage> {
                 color: Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Image.asset(item.imagePath, fit: BoxFit.contain),
+
+              child: item.product!.image.isNotEmpty
+                  ? Image.network(
+                      item.product!.image.first,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.image_not_supported, color: Colors.grey);
+                      },
+                    )
+                  : const Icon(Icons.image_not_supported, color: Colors.grey, size: 40),
             ),
             const SizedBox(width: 15),
 
@@ -161,22 +184,19 @@ class _FavoritePageState extends State<FavoritePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    item.product!.name,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    item.description,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-                  ),
+                  // Text(
+                  //   // item.product!.description,
+                  //   maxLines: 1,
+                  //   overflow: TextOverflow.ellipsis,
+                  //   style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  // ),
                   const SizedBox(height: 8),
                   Text(
-                    "\$${item.price.toStringAsFixed(2)}",
+                    rielFormat.format(item.product!.finalPrice),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
@@ -189,18 +209,10 @@ class _FavoritePageState extends State<FavoritePage> {
 
             IconButton(
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("${item.name} added to cart"),
-                    duration: const Duration(milliseconds: 500),
-                  ),
-                );
+                _addToCart(item.product!.id);
               },
-              icon: Icon(
-                Icons.shopping_bag_outlined,
-                color: Constant.primaryColor,
-                size: 28,
-              ),
+
+              icon: Icon(Icons.shopping_bag_outlined, color: Constant.primaryColor, size: 28),
             ),
           ],
         ),
@@ -230,19 +242,13 @@ class _FavoritePageState extends State<FavoritePage> {
             onPressed: _addAllToCart,
             style: ElevatedButton.styleFrom(
               backgroundColor: Constant.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               elevation: 5,
               shadowColor: Constant.primaryColor.withOpacity(0.4),
             ),
             child: const Text(
               "Add All To Cart",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
         ),

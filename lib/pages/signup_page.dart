@@ -1,11 +1,9 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:grocery_app/constants/constant.dart';
 import 'package:grocery_app/controller/auth_controller.dart';
 import 'package:grocery_app/pages/login_page.dart';
 import 'package:grocery_app/pages/main_page.dart';
-import 'package:grocery_app/service/storage/token_storage.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -15,13 +13,14 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  final String logo = "assets/icons/app_icon_color.svg";
   bool _obscurePassword = true;
+  bool _rememberMe = false;
+
   final AuthController authController = Get.find<AuthController>();
+
   late final TextEditingController _emailController;
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TokenStorage _tokenStorage = TokenStorage();
 
   @override
   void initState() {
@@ -38,142 +37,206 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   void _signup() async {
-    final username = _usernameController.text;
-    final password = _passwordController.text;
-    final res = await authController.register(username, password);
-    final success = res.success;
-    if (success) {
-      await _tokenStorage.setToken(res.token!);
+    final res = await authController.register(_usernameController.text, _passwordController.text);
+
+    if (res) {
       Get.snackbar("Success", "Signup successful");
-      log("User data: ${res.user}");
-      log("Signup successful, ${res.token}");
-      Get.offAll(() => MainPage());
-    } else {
-      Get.snackbar("Error", res.message);
+      await Future.delayed(const Duration(milliseconds: 500));
+      Get.offAll(() => const MainPage());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
-      appBar: AppBar(),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: size.width * 0.07),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(child: SvgPicture.asset(logo, width: 50)),
-              SizedBox(height: size.width * 0.07),
-              Text(
-                "Sign Up",
-                style: TextStyle(fontSize: size.width * 0.08, fontWeight: FontWeight.bold),
-              ),
-
-              Text(
-                "Enter your credential to continue",
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontSize: size.width * 0.04,
-                  fontWeight: FontWeight.w400,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                /// Logo
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Constant.primaryColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child: Image.asset("assets/images/logo/logo.png", fit: BoxFit.contain),
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(height: size.width * 0.07),
-              Text(
-                "Username",
-                style: TextStyle(color: Colors.grey.shade700, fontSize: size.width * 0.04),
-              ),
 
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(hintText: "Enter username"),
-              ),
-              SizedBox(height: size.width * 0.07),
-              Text("Email"),
+                const SizedBox(height: 24),
 
-              TextField(
-                controller: _emailController,
-                readOnly: true,
-                decoration: InputDecoration(
-                  hintText: "Enter email",
-                  suffixIcon: Icon(Icons.check, color: Colors.green),
+                /// Title
+                Text(
+                  "Create account",
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Constant.primaryColor,
+                  ),
                 ),
-              ),
-              SizedBox(height: size.width * 0.07),
-              Text("Password"),
+                const SizedBox(height: 8),
+                Text(
+                  "Please fill in the details below.",
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                ),
 
-              TextField(
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  hintText: "Enter password",
+                const SizedBox(height: 32),
+
+                /// Username
+                _buildTextField(
+                  label: "Username",
+                  controller: _usernameController,
+                  obscureText: false,
+                ),
+
+                const SizedBox(height: 16),
+
+                /// Email (Read-only)
+                _buildTextField(
+                  label: "Email",
+                  controller: _emailController,
+                  obscureText: false,
+                  readOnly: true,
+                  suffixIcon: const Icon(Icons.check, color: Colors.green),
+                ),
+
+                const SizedBox(height: 16),
+
+                /// Password
+                _buildTextField(
+                  label: "Password",
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
                   suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      color: Colors.grey,
+                    ),
                     onPressed: () {
                       setState(() {
                         _obscurePassword = !_obscurePassword;
                       });
                     },
-                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                    color: Colors.grey,
                   ),
                 ),
-              ),
-              SizedBox(height: size.width * 0.07),
-              RichText(
-                text: TextSpan(
+
+                const SizedBox(height: 20),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextSpan(
-                      text: 'By continuing you agree to our',
-                      style: TextStyle(color: Colors.black, fontSize: size.width * 0.04),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _rememberMe,
+                          onChanged: (v) => setState(() => _rememberMe = v!),
+                          activeColor: Constant.primaryColor,
+                        ),
+
+                        Text("Remember me", style: TextStyle(color: Colors.grey[700])),
+                      ],
                     ),
-                    TextSpan(
-                      text: 'Terms of Services',
-                      style: TextStyle(color: Colors.green, fontSize: size.width * 0.04),
-                    ),
-                    TextSpan(
-                      text: ' and ',
-                      style: TextStyle(color: Colors.black, fontSize: size.width * 0.04),
-                    ),
-                    TextSpan(
-                      text: 'Privacy Policy',
-                      style: TextStyle(color: Colors.green, fontSize: size.width * 0.04),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        "Forgot password",
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Constant.primaryColor),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              SizedBox(height: size.width * 0.07),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff53B176),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: Text("Sign Up", style: TextStyle(color: Colors.white)),
-                  onPressed: _signup,
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Already have an accound?"),
 
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginPage()),
-                      );
-                    },
-                    child: Text("Sign In", style: TextStyle(color: Colors.green)),
+                const SizedBox(height: 24),
+
+                /// Sign Up Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _signup,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Constant.primaryColor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      "Sign up",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ],
+                ),
+
+                const SizedBox(height: 32),
+
+                /// Bottom Text
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Already have an account? ", style: TextStyle(color: Colors.grey[600])),
+                    GestureDetector(
+                      onTap: () => Get.off(() => const LoginPage()),
+                      child: Text(
+                        "Sign in",
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Constant.primaryColor),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required bool obscureText,
+    bool readOnly = false,
+    Widget? suffixIcon,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText,
+        readOnly: readOnly,
+        onTapOutside: (event) {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+
+        decoration: InputDecoration(
+          labelText: label,
+          border: InputBorder.none,
+          floatingLabelStyle: TextStyle(color: Constant.primaryColor),
+
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          suffixIcon: suffixIcon,
         ),
       ),
     );

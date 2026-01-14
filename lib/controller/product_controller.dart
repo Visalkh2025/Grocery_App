@@ -18,6 +18,8 @@ class ProductController extends GetxController {
   final isProductsLoading = false.obs;
   final isSingleProductLoading = false.obs;
   final isProductByCateLoading = false.obs;
+  final isSearchLoading = false.obs;
+  final searchProducts = <Product>[].obs;
 
   Future<void> fetchProducts({bool refresh = false}) async {
     isProductsLoading(true);
@@ -39,5 +41,12 @@ class ProductController extends GetxController {
     final data = await productService.fetchSingleProduct(productId: productId);
     selectProduct.value = data;
     isSingleProductLoading(false);
+  }
+
+  Future<void> searchProduct({required String query}) async {
+    isSearchLoading(true);
+    final data = await productService.searchProduct(query);
+    searchProducts.assignAll(data);
+    isSearchLoading(false);
   }
 }

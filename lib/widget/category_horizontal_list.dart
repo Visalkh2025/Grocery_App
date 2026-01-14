@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:grocery_app/controller/product_controller.dart';
@@ -50,7 +51,24 @@ class CategoryHorizontalList extends StatelessWidget {
                         width: 1,
                       ),
                     ),
-                    child: Image.network(items[index].image),
+                    // child: items[index].image.isNotEmpty
+                    //     ? Image.network(items[index].image)
+                    //     : Icon(Icons.image_not_supported, color: Colors.grey),
+                    // child: Image.network(
+                    //   items[index].image,
+                    //   errorBuilder: (context, error, stackTrace) {
+                    //     return Center(
+                    //       child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                    //     );
+                    //   },
+                    // ),
+                    child: CachedNetworkImage(
+                      imageUrl: items[index].image,
+                      fit: BoxFit.contain,
+                      errorWidget: (context, error, stackTrace) {
+                        return const Icon(Icons.image_not_supported, color: Colors.grey);
+                      },
+                    ),
                   ),
                   const SizedBox(height: 5),
                   Text(

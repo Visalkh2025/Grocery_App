@@ -10,14 +10,14 @@ import 'package:qr_flutter/qr_flutter.dart';
 class KHQRPaymentPage extends StatefulWidget {
   final String qr;
   final int expiration;
-  final double amountUsd;
+  // final int amountUsd;
   final int amountKhr;
   final String deepLink;
 
   const KHQRPaymentPage({
     required this.qr,
     required this.expiration,
-    required this.amountUsd,
+    // required this.amountUsd,
     required this.amountKhr,
     required this.deepLink,
     Key? key,
@@ -176,11 +176,10 @@ class _KHQRPaymentPageState extends State<KHQRPaymentPage> {
                   ),
 
                   // USD amount
-                  Text(
-                    "${widget.amountUsd} USD",
-                    style: const TextStyle(fontSize: 13, color: Colors.grey),
-                  ),
-
+                  // Text(
+                  //   "${widget.amountUsd} USD",
+                  //   style: const TextStyle(fontSize: 13, color: Colors.grey),
+                  // ),
                   const SizedBox(height: 10),
 
                   // QR

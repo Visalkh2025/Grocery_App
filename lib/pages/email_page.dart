@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:grocery_app/constants/constant.dart';
 import 'package:grocery_app/controller/auth_controller.dart';
 import 'package:grocery_app/pages/OTP_page.dart';
+import 'package:grocery_app/pages/login_page.dart';
 import 'package:grocery_app/pages/verification_otp_page.dart';
 import 'package:grocery_app/utils/snackbar_helper.dart';
 import 'package:grocery_app/widget/primary_button.dart';
@@ -22,12 +24,12 @@ class _EmailPageState extends State<EmailPage> {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text;
       final res = await authController.sentOtp(email);
-      if (res.success) {
+      if (res) {
         // Navigate to OTP page
-        //Get.to(() => VerificationOtpPage());
-        SnackbarHelper.showSuccess("Success", res.message ?? "OTP sent successfully to $email");
+        Get.to(() => VerificationOtpPage());
+        // SnackbarHelper.showSuccess("Success", res.message ?? "OTP sent successfully to $email");
       } else {
-        SnackbarHelper.showError("Failed", res.message ?? "Failed to send OTP. Please try again.");
+        // SnackbarHelper.showError("Failed", res.message ?? "Failed to send OTP. Please try again.");
       }
     }
   }
@@ -102,6 +104,27 @@ class _EmailPageState extends State<EmailPage> {
                         width: double.infinity,
                         height: 50,
                         child: PrimaryButton(text: 'Verify Email', onPressed: _sentOTP),
+                      ),
+                      const SizedBox(height: 30),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Already have an account? ",
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                          GestureDetector(
+                            onTap: () => Get.off(() => const LoginPage()),
+                            child: Text(
+                              "Sign in",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Constant.primaryColor,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

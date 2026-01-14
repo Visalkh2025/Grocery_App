@@ -57,7 +57,9 @@ class CategorySection extends StatelessWidget {
                       ),
                       color: gridColor[index % gridColor.length].withValues(alpha: 0.2),
                     ),
-                    child: Image.asset(cat.imgPath, fit: BoxFit.contain),
+                    child: cat.imgPath.isNotEmpty
+                        ? Image.asset(cat.imgPath, fit: BoxFit.contain)
+                        : Icon(Icons.image_not_supported, color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
                   // Category Name
